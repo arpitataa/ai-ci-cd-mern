@@ -1,0 +1,32 @@
+version: "3"
+
+services:
+
+  backend:
+    build: ./server
+    ports:
+      - "5000:5000"
+    environment:
+      - MONGO_URI=mongodb://mongo:27017/devops
+    depends_on:
+      - mongo
+      - ai-service
+
+  ai-service:
+    build: ./ai-service
+    ports:
+      - "7000:7000"
+    environment:
+      - GROQ_API_KEY=${GROQ_API_KEY}
+
+  client:
+    build: ./client
+    ports:
+      - "3000:3000"
+    depends_on:
+      - backend
+
+  mongo:
+    image: mongo
+    ports:
+      - "27017:27017"
