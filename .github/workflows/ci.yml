@@ -40,3 +40,5 @@ jobs:
       run: docker build -t ${{ secrets.DOCKER_USERNAME }}/ai-ci-cd-client:latest ./client
     - name: Push Client Image
       run: docker push ${{ secrets.DOCKER_USERNAME }}/ai-ci-cd-client:latest
+
+      #trigger pipeline
