@@ -1,13 +1,13 @@
 name: CI/CD Pipeline
 
 on:
-  push:
-    branches:
-      - main
+push:
+branches:
+  - main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+build:
+runs-on: ubuntu-latest
 
 steps:
   - name: Checkout code
@@ -43,3 +43,4 @@ steps:
 
   - name: Push Client Image
     run: docker push ${{ secrets.DOCKER_USERNAME }}/ai-ci-cd-client:latest
+
