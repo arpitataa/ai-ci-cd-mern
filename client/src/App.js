@@ -5,7 +5,7 @@ function Dashboard() {
   const [logs, setLogs] = useState([])
 
   useEffect(() => {
-    axios.get("http://localhost:5000/api/logs")
+    axios.get("http://13.206.120.95:5000/api/logs")
       .then(res => setLogs(res.data))
       .catch(err => console.error(err))
   }, [])

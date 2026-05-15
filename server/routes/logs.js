@@ -2,47 +2,59 @@ const express = require("express")
 const router = express.Router()
 const axios = require("axios")
 
-const Log = require("../models/PipelineLog")
+const PipelineLog = require("../models/PipelineLog")
 
 router.post("/logs", async (req, res) => {
 
- const { status, logs } = req.body
+  const { status, logs } = req.body
 
- try {
+  try {
 
-  // Send logs to AI service
-  const aiResponse = await axios.post("http://localhost:7000/analyze", {
- logs
-})
+    const aiResponse = await axios.post(
+      "http://ai-service:7000/analyze",
+      { logs }
+    )
 
-  const aiAnalysis = aiResponse.data.analysis
+    const analysis = aiResponse.data.analysis
 
-  // Save to MongoDB
-  const log = new Log({
-   status,
-   logs,
-   aiAnalysis
-  })
+    const log = new PipelineLog({
+      status,
+      logs,
+      ai_analysis: analysis
+    })
 
-  await log.save()
+    await log.save()
 
-  res.json(log)
+    res.json(log)
 
- } catch (err) {
+  } catch (err) {
 
-  console.log(err)
+    console.error(err)
 
-  res.status(500).json({ error: "AI analysis failed" })
+    res.status(500).json({
+      error: "AI analysis failed"
+    })
 
- }
+  }
 
 })
 
 router.get("/logs", async (req, res) => {
 
- const logs = await Log.find().sort({ createdAt: -1 })
+  try {
 
- res.json(logs)
+    const logs = await PipelineLog.find()
+      .sort({ createdAt: -1 })
+
+    res.json(logs)
+
+  } catch (err) {
+
+    res.status(500).json({
+      error: "Failed to fetch logs"
+    })
+
+  }
 
 })
 

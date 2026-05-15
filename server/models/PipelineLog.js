@@ -2,11 +2,20 @@ const mongoose = require("mongoose")
 
 const PipelineLogSchema = new mongoose.Schema({
 
-  status: String,
+  status: {
+    type: String,
+    required: true
+  },
 
-  logs: String,
+  logs: {
+    type: String,
+    required: true
+  },
 
-  ai_analysis: String,
+  ai_analysis: {
+    type: String,
+    required: true
+  },
 
   createdAt: {
     type: Date,
@@ -15,4 +24,7 @@ const PipelineLogSchema = new mongoose.Schema({
 
 })
 
-module.exports = mongoose.model("PipelineLog", PipelineLogSchema)
+module.exports = mongoose.model(
+  "PipelineLog",
+  PipelineLogSchema
+)

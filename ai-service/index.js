@@ -15,26 +15,36 @@ const groq = new Groq({
 
 app.post("/analyze", async (req, res) => {
 
-  const logs = req.body.logs
+  const { logs } = req.body
 
   try {
 
-    const response = await groq.chat.completions.create({
+    const response =
+      await groq.chat.completions.create({
+
       model: "llama-3.1-8b-instant",
+
       messages: [
+
         {
           role: "system",
-          content: "You are a DevOps expert who analyzes CI/CD pipeline failures."
+          content:
+            "You are a DevOps expert who analyzes CI/CD pipeline failures."
         },
+
         {
           role: "user",
-          content: `Analyze this CI/CD pipeline error and explain the cause and fix:\n${logs}`
+          content:
+            `Analyze this CI/CD pipeline issue:\n${logs}`
         }
+
       ]
+
     })
 
     res.json({
-      analysis: response.choices[0].message.content
+      analysis:
+        response.choices[0].message.content
     })
 
   } catch (err) {
@@ -44,6 +54,7 @@ app.post("/analyze", async (req, res) => {
     res.status(500).json({
       error: "AI analysis failed"
     })
+
   }
 
 })
