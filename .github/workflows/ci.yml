@@ -118,7 +118,7 @@ jobs:
           LOG_CONTENT="No detailed logs found"
         fi
 
-        curl -X POST http://13.206.144.172/:5000/api/logs \
+        curl -X POST http://13.206.144.172:5000/api/logs \
         -H "Content-Type: application/json" \
         -d "$(jq -n \
           --arg status "failed" \
