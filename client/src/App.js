@@ -2,13 +2,19 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 
 function Dashboard() {
-  const [logs, setLogs] = useState([])
-  const logs == useState([])
   useEffect(() => {
-    axios.get("http://13.206.251.179:5000/api/logs")
+  const fetchLogs = () => {
+    axios.get("http://13.233.245.247:5000/api/logs")
       .then(res => setLogs(res.data))
       .catch(err => console.error(err))
-  }, [])
+  }
+
+  fetchLogs()
+
+  const interval = setInterval(fetchLogs, 5000)
+
+  return () => clearInterval(interval)
+}, [])
 
   return (
     <div>
