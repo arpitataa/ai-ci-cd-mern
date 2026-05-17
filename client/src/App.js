@@ -3,7 +3,6 @@ import axios from "axios"
 
 function Dashboard() {
   const [logs, setLogs] = useState([])
-  let = 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [search, setSearch] = useState("")
