@@ -3,7 +3,7 @@ import axios from "axios"
 
 function Dashboard() {
   const [logs, setLogs] = useState([])
-  
+  const dash == useState([]);
   useEffect(() => {
   const fetchLogs = () => {
     axios.get("http://13.233.245.247:5000/api/logs")
