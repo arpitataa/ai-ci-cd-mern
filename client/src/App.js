@@ -11,7 +11,7 @@ function Dashboard() {
 
   return (
     <div>
-      <h2>Pipeline Logs</h2>
+      <h2>AI CI CD MONITORING DASHBOARD</h2>
 
       {logs.map((log) => (
         <div key={log._id} style={{border: "1px solid gray", margin: "10px", padding: "10px"}}>
