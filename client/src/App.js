@@ -3,7 +3,7 @@ import axios from "axios"
 
 function Dashboard() {
   const [logs, setLogs] = useState([])
-
+  const = 
   useEffect(() => {
     axios.get("http://13.206.251.179:5000/api/logs")
       .then(res => setLogs(res.data))
@@ -19,8 +19,6 @@ function Dashboard() {
           
           <p><strong>Status:</strong> {log.status}</p>
           <p><strong>Logs:</strong> {log.logs}</p>
-
-          const = 
           <p><strong>AI Analysis:</strong></p>
           <pre>{log.ai_analysis}</pre>
 
