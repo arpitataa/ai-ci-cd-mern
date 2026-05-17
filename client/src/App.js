@@ -20,7 +20,7 @@ function Dashboard() {
           <p><strong>Status:</strong> {log.status}</p>
           <p><strong>Logs:</strong> {log.logs}</p>
 
-          {/* 👇 THIS IS WHAT YOU ADD */}
+          const = 
           <p><strong>AI Analysis:</strong></p>
           <pre>{log.ai_analysis}</pre>
 
