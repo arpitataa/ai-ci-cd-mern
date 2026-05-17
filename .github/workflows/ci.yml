@@ -116,3 +116,19 @@ jobs:
           --arg status "failed" \
           --arg logs "$LOG_CONTENT" \
           '{status: $status, logs: $logs}')"
+
+    - name: Deploy to EC2
+      if : success()
+      uses: appleboy/ssh-action@v1.0.3
+      with:
+        host: ${{ secrets.EC2_HOST }}
+        username: ${{ secrets.EC2_USER }}
+        key: ${{ secrets.EC2_SSH_KEY }}
+        script: |
+          cd ~/project
+          docker compose down
+
+          docker pull ${{ secrets.DOCKER_USERNAME }}/ai-ci-cd-server:latest
+          docker pull ${{ secrets.DOCKER_USERNAME }}/ai-ci-cd-client:latest
+
+          docker compose up -d
