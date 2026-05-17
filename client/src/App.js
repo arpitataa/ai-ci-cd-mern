@@ -2,6 +2,8 @@ import { useEffect, useState } from "react"
 import axios from "axios"
 
 function Dashboard() {
+  const [logs, setLogs] = useState([])
+  
   useEffect(() => {
   const fetchLogs = () => {
     axios.get("http://13.233.245.247:5000/api/logs")

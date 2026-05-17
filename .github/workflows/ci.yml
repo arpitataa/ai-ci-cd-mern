@@ -82,6 +82,14 @@ jobs:
       run: |
         docker build -t ${{ secrets.DOCKER_USERNAME }}/ai-ci-cd-client:latest ./client 2>&1 | tee docker-client-log.txt
 
+    - name: Verify Client Image Exists
+      run: |
+        docker images | grep ai-ci-cd-client
+
+    - name: Push Client Image
+      run: |
+        docker push ${{ secrets.DOCKER_USERNAME }}/ai-ci-cd-client:latest
+
     # -------------------------
     # PUSH CLIENT IMAGE
     # -------------------------
