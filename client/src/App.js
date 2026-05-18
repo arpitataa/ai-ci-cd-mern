@@ -14,6 +14,7 @@ function Dashboard() {
   const fetchLogs = async () => {
     try {
       const res = await axios.get(API_URL)
+      //trigger pipeline
       setLogs(res.data)
       setError("")
       setLastUpdated(new Date())
