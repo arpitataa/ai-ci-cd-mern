@@ -38,14 +38,22 @@ router.post("/logs", async (req, res) => {
 })
 
 router.get("/logs", async (req, res) => {
+
   try {
-    const logs = await PipelineLog.find().sort({ createdAt: -1 })
+
+    const logs = await Log.find()
+      .sort({ createdAt: -1 })
+
     res.json(logs)
+
   } catch (err) {
+
     res.status(500).json({
-      error: "Failed to fetch logs"
+      error: err.message
     })
+
   }
+
 })
 
 module.exports = router
