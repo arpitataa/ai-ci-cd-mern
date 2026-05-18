@@ -6,12 +6,10 @@ on:
       - main
 
 jobs:
-
   build:
     runs-on: ubuntu-latest
 
     steps:
-
     - name: Checkout code
       uses: actions/checkout@v3
 
@@ -20,37 +18,20 @@ jobs:
       with:
         node-version: '18'
 
-    # -------------------------
-    # SERVER INSTALL
-    # -------------------------
-
     - name: Install server dependencies
       working-directory: server
       run: |
         npm install 2>&1 | tee server-log.txt
-
-    # -------------------------
-    # CLIENT INSTALL
-    # -------------------------
 
     - name: Install client dependencies
       working-directory: client
       run: |
         npm install 2>&1 | tee client-install-log.txt
 
-    # -------------------------
-    # REACT BUILD
-    # THIS IS IMPORTANT
-    # -------------------------
-
     - name: Build React App
       working-directory: client
       run: |
         npm run build 2>&1 | tee build-log.txt
-
-    # -------------------------
-    # DOCKER LOGIN
-    # -------------------------
 
     - name: Login to Docker Hub
       uses: docker/login-action@v2
@@ -58,37 +39,17 @@ jobs:
         username: ${{ secrets.DOCKER_USERNAME }}
         password: ${{ secrets.DOCKER_TOKEN }}
 
-    # -------------------------
-    # BUILD SERVER IMAGE
-    # -------------------------
-
     - name: Build Server Image
       run: |
         docker build -t ${{ secrets.DOCKER_USERNAME }}/ai-ci-cd-server:latest ./server 2>&1 | tee docker-server-log.txt
-
-    # -------------------------
-    # PUSH SERVER IMAGE
-    # -------------------------
 
     - name: Push Server Image
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/ai-ci-cd-server:latest
 
-    # -------------------------
-    # BUILD CLIENT IMAGE
-    # -------------------------
-
     - name: Build Client Image
       run: |
         docker build -t ${{ secrets.DOCKER_USERNAME }}/ai-ci-cd-client:latest ./client 2>&1 | tee docker-client-log.txt
-
-    - name: Verify Client Image Exists
-      run: |
-        docker images | grep ai-ci-cd-client
-
-    # -------------------------
-    # PUSH CLIENT IMAGE
-    # -------------------------
 
     - name: Push Client Image
       run: |
@@ -110,16 +71,22 @@ jobs:
           docker pull ${{ secrets.DOCKER_USERNAME }}/ai-ci-cd-client:latest
 
           docker compose up -d --remove-orphans
-      
+
+    - name: Wait for Backend
+      if: success()
+      run: |
+        sleep 20
+
     - name: Send Success Logs to Backend
       if: success()
       run: |
-        curl -X POST http://13.206.144.172:5000/api/logs \
+        curl --retry 5 --retry-delay 5 --connect-timeout 10 \
+        -X POST http://${{ secrets.EC2_HOST }}:5000/api/logs \
         -H "Content-Type: application/json" \
         -d "$(jq -n \
           --arg status "success" \
           --arg logs "Build, Docker image push, and EC2 deployment completed successfully." \
-          '{status: $status, logs: $logs}')"
+          '{status: $status, logs: $logs}')" || true
 
     - name: Send Failure Logs to Backend
       if: failure()
@@ -138,9 +105,10 @@ jobs:
           LOG_CONTENT=$(cat docker-client-log.txt)
         fi
 
-        curl -X POST http://13.206.144.172:5000/api/logs \
+        curl --retry 5 --retry-delay 5 --connect-timeout 10 \
+        -X POST http://${{ secrets.EC2_HOST }}:5000/api/logs \
         -H "Content-Type: application/json" \
         -d "$(jq -n \
           --arg status "failed" \
           --arg logs "$LOG_CONTENT" \
-          '{status: $status, logs: $logs}')"
+          '{status: $status, logs: $logs}')" || true
