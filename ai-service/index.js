@@ -9,6 +9,7 @@ const app = express()
 app.use(cors())
 app.use(express.json())
 
+//trigger pipeline
 const groq = new Groq({
   apiKey: process.env.GROQ_API_KEY
 })
