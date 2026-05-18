@@ -3,7 +3,6 @@ import axios from "axios"
 
 function Dashboard() {
   const [logs, setLogs] = useState([])
-  const = 
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState("")
   const [search, setSearch] = useState("")
@@ -15,13 +14,18 @@ function Dashboard() {
   const fetchLogs = async () => {
     try {
       const res = await axios.get(API_URL)
-      //trigger pipeline
-      setLogs(res.data)
+
+      if (Array.isArray(res.data)) {
+        setLogs(res.data)
+      } else {
+        setLogs([])
+      }
+
       setError("")
       setLastUpdated(new Date())
     } catch (err) {
       console.error(err)
-      setError("Unable to fetch pipeline logs.. Please check backend/API connection.")
+      setError("Unable to fetch pipeline logs. Please check backend/API connection.")
     } finally {
       setLoading(false)
     }
@@ -37,7 +41,7 @@ function Dashboard() {
     return logs.filter((log) => {
       const matchesFilter = filter === "all" || log.status === filter
 
-      const text = `${log.status} ${log.logs} ${log.ai_analysis}`.toLowerCase()
+      const text = `${log.status || ""} ${log.logs || ""} ${log.ai_analysis || ""}`.toLowerCase()
       const matchesSearch = text.includes(search.toLowerCase())
 
       return matchesFilter && matchesSearch
@@ -46,43 +50,62 @@ function Dashboard() {
 
   const failedCount = logs.filter((log) => log.status === "failed").length
   const successCount = logs.filter((log) => log.status === "success").length
+  const latestRun = logs[0]
 
   return (
     <div style={styles.page}>
       <div style={styles.header}>
         <div>
+          <div style={styles.liveBadge}>
+            <span style={styles.liveDot}></span>
+            Live Monitoring
+          </div>
+
           <h1 style={styles.title}>AI CI/CD Monitoring Dashboard</h1>
+
           <p style={styles.subtitle}>
             Real-time CI/CD failure tracking with AI-powered log analysis
           </p>
         </div>
 
         <button onClick={fetchLogs} style={styles.refreshButton}>
-          Refresh
+          🔄 Refresh
         </button>
       </div>
 
       <div style={styles.statsGrid}>
         <div style={styles.statCard}>
-          <p style={styles.statLabel}>Total Logs</p>
+          <p style={styles.statLabel}>📊 Total Logs</p>
           <h2 style={styles.statValue}>{logs.length}</h2>
         </div>
 
         <div style={styles.statCard}>
-          <p style={styles.statLabel}>Failures</p>
+          <p style={styles.statLabel}>❌ Failures</p>
           <h2 style={{ ...styles.statValue, color: "#f87171" }}>{failedCount}</h2>
         </div>
 
         <div style={styles.statCard}>
-          <p style={styles.statLabel}>Successful</p>
+          <p style={styles.statLabel}>✅ Successful</p>
           <h2 style={{ ...styles.statValue, color: "#4ade80" }}>{successCount}</h2>
+        </div>
+
+        <div style={styles.statCard}>
+          <p style={styles.statLabel}>🚀 Latest Run</p>
+          <h2
+            style={{
+              ...styles.statValue,
+              color: latestRun?.status === "failed" ? "#f87171" : "#4ade80"
+            }}
+          >
+            {latestRun ? latestRun.status.toUpperCase() : "N/A"}
+          </h2>
         </div>
       </div>
 
       <div style={styles.controls}>
         <input
           type="text"
-          placeholder="Search logs or AI analysis..."
+          placeholder="Search logs, errors, status or AI analysis..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           style={styles.searchInput}
@@ -106,7 +129,7 @@ function Dashboard() {
 
       {loading && <p style={styles.message}>Loading pipeline logs...</p>}
 
-      {error && <p style={styles.error}>{error}</p>}
+      {error && <p style={styles.error}>⚠️ {error}</p>}
 
       {!loading && filteredLogs.length === 0 && (
         <p style={styles.message}>No pipeline logs found.</p>
@@ -124,7 +147,7 @@ function Dashboard() {
                   color: log.status === "failed" ? "#fecaca" : "#bbf7d0"
                 }}
               >
-                {log.status?.toUpperCase()}
+                {log.status === "failed" ? "❌ FAILED" : "✅ SUCCESS"}
               </span>
 
               <span style={styles.date}>
@@ -146,6 +169,10 @@ function Dashboard() {
           </div>
         ))}
       </div>
+
+      <p style={styles.footer}>
+        AI-powered CI/CD monitoring system using GitHub Actions, Docker, EC2 and MongoDB
+      </p>
     </div>
   )
 }
@@ -153,7 +180,7 @@ function Dashboard() {
 const styles = {
   page: {
     minHeight: "100vh",
-    background: "linear-gradient(135deg, #0f172a, #111827)",
+    background: "radial-gradient(circle at top left, #1e3a8a, #0f172a 45%, #020617)",
     color: "#f9fafb",
     padding: "32px",
     fontFamily: "Arial, sans-serif"
@@ -165,10 +192,31 @@ const styles = {
     gap: "20px",
     marginBottom: "28px"
   },
+  liveBadge: {
+    display: "inline-flex",
+    alignItems: "center",
+    gap: "8px",
+    backgroundColor: "#052e16",
+    color: "#bbf7d0",
+    padding: "7px 12px",
+    borderRadius: "999px",
+    fontSize: "13px",
+    fontWeight: "700",
+    marginBottom: "12px",
+    border: "1px solid #166534"
+  },
+  liveDot: {
+    width: "9px",
+    height: "9px",
+    borderRadius: "50%",
+    backgroundColor: "#22c55e",
+    boxShadow: "0 0 12px #22c55e"
+  },
   title: {
     margin: 0,
-    fontSize: "34px",
-    fontWeight: "800"
+    fontSize: "36px",
+    fontWeight: "900",
+    letterSpacing: "0.5px"
   },
   subtitle: {
     marginTop: "8px",
@@ -176,13 +224,14 @@ const styles = {
     fontSize: "15px"
   },
   refreshButton: {
-    backgroundColor: "#2563eb",
+    background: "linear-gradient(135deg, #2563eb, #7c3aed)",
     color: "white",
     border: "none",
-    borderRadius: "10px",
-    padding: "12px 18px",
+    borderRadius: "12px",
+    padding: "13px 20px",
     cursor: "pointer",
-    fontWeight: "700"
+    fontWeight: "800",
+    boxShadow: "0 10px 25px rgba(37,99,235,0.35)"
   },
   statsGrid: {
     display: "grid",
@@ -191,15 +240,15 @@ const styles = {
     marginBottom: "22px"
   },
   statCard: {
-    backgroundColor: "#1f2937",
+    backgroundColor: "rgba(31,41,55,0.85)",
     padding: "20px",
-    borderRadius: "16px",
+    borderRadius: "18px",
     border: "1px solid #374151",
-    boxShadow: "0 10px 25px rgba(0,0,0,0.25)"
+    boxShadow: "0 12px 28px rgba(0,0,0,0.3)"
   },
   statLabel: {
     margin: 0,
-    color: "#9ca3af",
+    color: "#cbd5e1",
     fontSize: "14px"
   },
   statValue: {
@@ -215,17 +264,18 @@ const styles = {
   searchInput: {
     flex: 1,
     minWidth: "240px",
-    padding: "12px",
-    borderRadius: "10px",
-    border: "1px solid #374151",
-    backgroundColor: "#111827",
-    color: "white"
+    padding: "13px",
+    borderRadius: "12px",
+    border: "1px solid #475569",
+    backgroundColor: "#020617",
+    color: "white",
+    outline: "none"
   },
   select: {
-    padding: "12px",
-    borderRadius: "10px",
-    border: "1px solid #374151",
-    backgroundColor: "#111827",
+    padding: "13px",
+    borderRadius: "12px",
+    border: "1px solid #475569",
+    backgroundColor: "#020617",
     color: "white"
   },
   updatedText: {
@@ -238,11 +288,11 @@ const styles = {
     gap: "20px"
   },
   logCard: {
-    backgroundColor: "#1f2937",
+    backgroundColor: "rgba(31,41,55,0.9)",
     border: "1px solid #374151",
-    borderRadius: "18px",
+    borderRadius: "20px",
     padding: "20px",
-    boxShadow: "0 12px 28px rgba(0,0,0,0.3)"
+    boxShadow: "0 16px 35px rgba(0,0,0,0.35)"
   },
   cardHeader: {
     display: "flex",
@@ -253,10 +303,10 @@ const styles = {
     flexWrap: "wrap"
   },
   badge: {
-    padding: "7px 12px",
+    padding: "8px 13px",
     borderRadius: "999px",
     fontSize: "12px",
-    fontWeight: "800"
+    fontWeight: "900"
   },
   date: {
     color: "#9ca3af",
@@ -270,7 +320,7 @@ const styles = {
     color: "#e5e7eb"
   },
   logBox: {
-    backgroundColor: "#0f172a",
+    backgroundColor: "#020617",
     padding: "14px",
     borderRadius: "12px",
     color: "#e5e7eb",
@@ -279,13 +329,13 @@ const styles = {
     border: "1px solid #334155"
   },
   analysisBox: {
-    backgroundColor: "#111827",
+    backgroundColor: "#052e16",
     padding: "14px",
     borderRadius: "12px",
     color: "#d1fae5",
     whiteSpace: "pre-wrap",
     overflowX: "auto",
-    border: "1px solid #065f46"
+    border: "1px solid #166534"
   },
   message: {
     color: "#cbd5e1",
@@ -297,6 +347,12 @@ const styles = {
     color: "#fecaca",
     padding: "12px",
     borderRadius: "10px"
+  },
+  footer: {
+    textAlign: "center",
+    color: "#64748b",
+    marginTop: "35px",
+    fontSize: "13px"
   }
 }
 
