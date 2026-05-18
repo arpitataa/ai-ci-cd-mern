@@ -86,10 +86,6 @@ jobs:
       run: |
         docker images | grep ai-ci-cd-client
 
-    - name: Push Client Image
-      run: |
-        docker push ${{ secrets.DOCKER_USERNAME }}/ai-ci-cd-client:latest
-
     # -------------------------
     # PUSH CLIENT IMAGE
     # -------------------------
@@ -98,35 +94,8 @@ jobs:
       run: |
         docker push ${{ secrets.DOCKER_USERNAME }}/ai-ci-cd-client:latest
 
-    # -------------------------
-    # SEND REAL FAILURE LOGS
-    # -------------------------
-
-    - name: Send Failure Logs to Backend
-      if: failure()
-      run: |
-
-        LOG_CONTENT=""
-
-        if [ -f client/build-log.txt ]; then
-          LOG_CONTENT=$(cat client/build-log.txt)
-        elif [ -f client/client-install-log.txt ]; then
-          LOG_CONTENT=$(cat client/client-install-log.txt)
-        elif [ -f server/server-log.txt ]; then
-          LOG_CONTENT=$(cat server/server-log.txt)
-        else
-          LOG_CONTENT="No detailed logs found"
-        fi
-
-        curl -X POST http://13.206.144.172:5000/api/logs \
-        -H "Content-Type: application/json" \
-        -d "$(jq -n \
-          --arg status "failed" \
-          --arg logs "$LOG_CONTENT" \
-          '{status: $status, logs: $logs}')"
-
     - name: Deploy to EC2
-      if : success()
+      if: success()
       uses: appleboy/ssh-action@v1.0.3
       with:
         host: ${{ secrets.EC2_HOST }}
@@ -140,3 +109,37 @@ jobs:
           docker pull ${{ secrets.DOCKER_USERNAME }}/ai-ci-cd-client:latest
 
           docker compose up -d
+      
+    - name: Send Success Logs to Backend
+      if: success()
+      run: |
+        curl -X POST http://13.206.144.172:5000/api/logs \
+        -H "Content-Type: application/json" \
+        -d "$(jq -n \
+          --arg status "success" \
+          --arg logs "Build, Docker image push, and EC2 deployment completed successfully." \
+          '{status: $status, logs: $logs}')"
+
+    - name: Send Failure Logs to Backend
+      if: failure()
+      run: |
+        LOG_CONTENT="Pipeline failed. Check GitHub Actions logs."
+
+        if [ -f client/build-log.txt ]; then
+          LOG_CONTENT=$(cat client/build-log.txt)
+        elif [ -f client/client-install-log.txt ]; then
+          LOG_CONTENT=$(cat client/client-install-log.txt)
+        elif [ -f server/server-log.txt ]; then
+          LOG_CONTENT=$(cat server/server-log.txt)
+        elif [ -f docker-server-log.txt ]; then
+          LOG_CONTENT=$(cat docker-server-log.txt)
+        elif [ -f docker-client-log.txt ]; then
+          LOG_CONTENT=$(cat docker-client-log.txt)
+        fi
+
+        curl -X POST http://13.206.144.172:5000/api/logs \
+        -H "Content-Type: application/json" \
+        -d "$(jq -n \
+          --arg status "failed" \
+          --arg logs "$LOG_CONTENT" \
+          '{status: $status, logs: $logs}')"
