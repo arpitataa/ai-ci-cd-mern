@@ -19,7 +19,7 @@ function Dashboard() {
       setLastUpdated(new Date())
     } catch (err) {
       console.error(err)
-      setError("Unable to fetch pipeline logs. Please check backend/API connection.")
+      setError("Unable to fetch pipeline logs.. Please check backend/API connection.")
     } finally {
       setLoading(false)
     }
