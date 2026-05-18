@@ -103,12 +103,13 @@ jobs:
         key: ${{ secrets.EC2_SSH_KEY }}
         script: |
           cd ~/project
-          docker compose down
+
+          docker system prune -f
 
           docker pull ${{ secrets.DOCKER_USERNAME }}/ai-ci-cd-server:latest
           docker pull ${{ secrets.DOCKER_USERNAME }}/ai-ci-cd-client:latest
 
-          docker compose up -d
+          docker compose up -d --remove-orphans
       
     - name: Send Success Logs to Backend
       if: success()
