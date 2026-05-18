@@ -67,30 +67,26 @@ function Dashboard() {
             Real-time CI/CD failure tracking with AI-powered log analysis
           </p>
         </div>
-
-        <button onClick={fetchLogs} style={styles.refreshButton}>
-          🔄 Refresh
-        </button>
       </div>
 
       <div style={styles.statsGrid}>
         <div style={styles.statCard}>
-          <p style={styles.statLabel}>📊 Total Logs</p>
+          <p style={styles.statLabel}>Total Logs</p>
           <h2 style={styles.statValue}>{logs.length}</h2>
         </div>
 
         <div style={styles.statCard}>
-          <p style={styles.statLabel}>❌ Failures</p>
+          <p style={styles.statLabel}>Failures</p>
           <h2 style={{ ...styles.statValue, color: "#f87171" }}>{failedCount}</h2>
         </div>
 
         <div style={styles.statCard}>
-          <p style={styles.statLabel}>✅ Successful</p>
+          <p style={styles.statLabel}>Successful</p>
           <h2 style={{ ...styles.statValue, color: "#4ade80" }}>{successCount}</h2>
         </div>
 
         <div style={styles.statCard}>
-          <p style={styles.statLabel}>🚀 Latest Run</p>
+          <p style={styles.statLabel}>Latest Run</p>
           <h2
             style={{
               ...styles.statValue,
@@ -129,7 +125,7 @@ function Dashboard() {
 
       {loading && <p style={styles.message}>Loading pipeline logs...</p>}
 
-      {error && <p style={styles.error}>⚠️ {error}</p>}
+      {error && <p style={styles.error}>{error}</p>}
 
       {!loading && filteredLogs.length === 0 && (
         <p style={styles.message}>No pipeline logs found.</p>
@@ -147,7 +143,7 @@ function Dashboard() {
                   color: log.status === "failed" ? "#fecaca" : "#bbf7d0"
                 }}
               >
-                {log.status === "failed" ? "❌ FAILED" : "✅ SUCCESS"}
+                {log.status === "failed" ? "FAILED" : "SUCCESS"}
               </span>
 
               <span style={styles.date}>
@@ -222,16 +218,6 @@ const styles = {
     marginTop: "8px",
     color: "#cbd5e1",
     fontSize: "15px"
-  },
-  refreshButton: {
-    background: "linear-gradient(135deg, #2563eb, #7c3aed)",
-    color: "white",
-    border: "none",
-    borderRadius: "12px",
-    padding: "13px 20px",
-    cursor: "pointer",
-    fontWeight: "800",
-    boxShadow: "0 10px 25px rgba(37,99,235,0.35)"
   },
   statsGrid: {
     display: "grid",
